@@ -1,0 +1,20 @@
+{
+  "name": "agent-e2e",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI-agent operated Playwright E2E framework",
+  "scripts": {
+    "project:init": "node scripts/init-project.mjs",
+    "validate": "node scripts/validate-project.mjs",
+    "audit": "node scripts/run-project.mjs",
+    "report:open": "node scripts/open-report.mjs",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run validate -- --project _template && npm run typecheck && playwright test --list --reporter=line"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.61.1",
+    "@types/node": "24.12.2",
+    "dotenv": "17.4.2",
+    "typescript": "7.0.2"
+  }
+}

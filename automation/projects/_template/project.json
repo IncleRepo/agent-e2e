@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "_template",
+  "name": "New Web Project",
+  "mode": "read-only",
+  "urls": {
+    "frontendEnv": "E2E_FE_URL",
+    "frontendDefault": "http://localhost:3000",
+    "apiEnv": "E2E_API_URL",
+    "apiDefault": "http://localhost:8080/api",
+    "healthPath": "/health"
+  },
+  "source": {
+    "frontendEnv": "E2E_FE_SOURCE",
+    "backendEnv": "E2E_BE_SOURCE"
+  },
+  "auth": {
+    "loginPath": "/login",
+    "usernameEnv": "E2E_LOGIN_ID",
+    "passwordEnv": "E2E_LOGIN_PASSWORD",
+    "username": { "type": "label", "value": "Email" },
+    "password": { "type": "label", "value": "Password" },
+    "submit": { "type": "role", "role": "button", "value": "Sign in" },
+    "successPath": "/"
+  },
+  "ui": {
+    "errorBoundaryTexts": ["Something went wrong"],
+    "loadingTexts": ["Loading", "Please wait"],
+    "invalidTextPattern": "\\bNaN\\b|\\bundefined\\b|\\[object Object\\]"
+  },
+  "safety": {
+    "allowedWrites": []
+  },
+  "report": {
+    "locale": "ko-KR"
+  }
+}

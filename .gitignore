@@ -1,0 +1,10 @@
+automation/node_modules/
+automation/.env.e2e.local
+automation/projects/*/.env.e2e.local
+automation/projects/*/.auth/
+reports/*
+!reports/.gitkeep
+playwright-report/
+test-results/
+.DS_Store
+Thumbs.db
