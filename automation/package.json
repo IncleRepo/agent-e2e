@@ -3,6 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "description": "AI-agent operated Playwright E2E framework",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IncleRepo/agent-e2e.git"
+  },
+  "homepage": "https://github.com/IncleRepo/agent-e2e#readme",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "browser:install": "playwright install chromium",
     "project:init": "node scripts/init-project.mjs",

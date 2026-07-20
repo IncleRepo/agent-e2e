@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { width: 1280px; height: 640px; margin: 0; }
+    body {
+      overflow: hidden;
+      background: #142a31;
+      color: #fff;
+      font-family: Pretendard, "Noto Sans KR", "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+    .canvas {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      width: 100%;
+      height: 100%;
+      border-top: 12px solid #0c9486;
+      border-bottom: 12px solid #0c9486;
+    }
+    .copy {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 72px 40px 72px 82px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 42px;
+      color: #a9bbc1;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .mark {
+      display: grid;
+      place-items: center;
+      width: 54px;
+      height: 54px;
+      border: 1px solid #557078;
+      border-radius: 7px;
+      color: #72d8c8;
+      font-size: 19px;
+      font-weight: 900;
+    }
+    h1 {
+      margin: 0;
+      font-size: 72px;
+      line-height: 1;
+      font-weight: 850;
+    }
+    .subtitle {
+      max-width: 640px;
+      margin: 26px 0 0;
+      color: #d2dcdf;
+      font-size: 25px;
+      line-height: 1.55;
+    }
+    .tags {
+      display: flex;
+      gap: 10px;
+      margin-top: 38px;
+    }
+    .tag {
+      padding: 9px 13px;
+      border: 1px solid #49636b;
+      border-radius: 5px;
+      color: #b9c9ce;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .visual {
+      display: flex;
+      align-items: center;
+      padding: 64px 72px 64px 18px;
+    }
+    .report {
+      width: 100%;
+      height: 470px;
+      overflow: hidden;
+      border: 1px solid #537079;
+      border-radius: 7px;
+      background: #f4f6f7;
+      box-shadow: 0 28px 55px rgba(0, 0, 0, .28);
+    }
+    .report-head {
+      height: 120px;
+      padding: 24px 25px;
+      border-bottom: 5px solid #b97811;
+      background: #203940;
+    }
+    .report-label { color: #f4c878; font-size: 11px; font-weight: 800; }
+    .report-title { margin-top: 15px; font-size: 21px; font-weight: 800; }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      height: 84px;
+      border-bottom: 1px solid #dce2e4;
+      background: #fff;
+    }
+    .metric { padding: 17px 12px; border-right: 1px solid #dce2e4; color: #66747a; font-size: 9px; }
+    .metric strong { display: block; margin-top: 7px; color: #172126; font-size: 21px; }
+    .metric.issue strong { color: #a86405; }
+    .report-body { padding: 25px; color: #172126; }
+    .section-title { font-size: 16px; font-weight: 800; }
+    .line { height: 1px; margin: 11px 0 14px; background: #172126; }
+    .row {
+      display: grid;
+      grid-template-columns: 54px 1fr 24px;
+      align-items: center;
+      min-height: 54px;
+      border-bottom: 1px solid #dce2e4;
+      background: #fff;
+      font-size: 11px;
+    }
+    .status { margin-left: 10px; color: #137a52; font-size: 9px; font-weight: 800; }
+    .row strong { display: block; font-size: 11px; }
+    .row small { display: block; margin-top: 4px; color: #7b898e; font-size: 8px; }
+    .plus { color: #66747a; font-size: 15px; }
+  </style>
+</head>
+<body>
+  <main class="canvas">
+    <section class="copy">
+      <div class="brand"><span class="mark">E2E</span><span>AI-operated Playwright testing</span></div>
+      <h1>Agent E2E</h1>
+      <p class="subtitle">AI 에이전트로 테스트를 구성하고<br>한 장의 HTML 보고서로 확인하세요.</p>
+      <div class="tags"><span class="tag">Playwright</span><span class="tag">TypeScript</span><span class="tag">Read-only by default</span></div>
+    </section>
+    <section class="visual" aria-hidden="true">
+      <div class="report">
+        <header class="report-head">
+          <div class="report-label">확인할 항목이 있습니다</div>
+          <div class="report-title">테스트를 마쳤습니다.<br>확인할 이슈는 1건입니다</div>
+        </header>
+        <div class="metrics">
+          <div class="metric">전체<strong>12</strong></div>
+          <div class="metric">통과<strong>12</strong></div>
+          <div class="metric">실패<strong>0</strong></div>
+          <div class="metric issue">이슈<strong>1</strong></div>
+        </div>
+        <div class="report-body">
+          <div class="section-title">E2E 시나리오</div>
+          <div class="line"></div>
+          <div class="row"><span class="status">통과</span><div><strong>대시보드 요약 조회</strong><small>화면 · API · 콘솔 진단</small></div><span class="plus">+</span></div>
+          <div class="row"><span class="status">통과</span><div><strong>월별 보고서 조회</strong><small>필터 변경과 데이터 표출 확인</small></div><span class="plus">+</span></div>
+          <div class="row"><span class="status">통과</span><div><strong>사용자 목록 검색</strong><small>검색어와 요청 파라미터 확인</small></div><span class="plus">+</span></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

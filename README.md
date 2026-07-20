@@ -8,6 +8,8 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-7.0-3178C6?logo=typescript&logoColor=white)
 ![Safety](https://img.shields.io/badge/default-read--only-087F72)
 ![Report](https://img.shields.io/badge/output-report.html-172126)
+[![Validate](https://github.com/IncleRepo/agent-e2e/actions/workflows/validate.yml/badge.svg)](https://github.com/IncleRepo/agent-e2e/actions/workflows/validate.yml)
+![License](https://img.shields.io/badge/license-MIT-2864A5)
 
 </div>
 
@@ -348,3 +350,7 @@ agent-e2e/
 - `automation/node_modules/`
 
 프로젝트 프로필과 시나리오는 공유하되 비밀번호, 토큰, 쿠키, 개인정보는 공유하지 않습니다. 채팅 작업이 끝나도 작성된 프로필과 테스트는 저장소에 남으므로, 다른 사람이 클론하거나 새 AI 작업을 열어도 같은 기준으로 이어서 사용할 수 있습니다.
+
+## 라이선스
+
+이 프로젝트는 [MIT License](LICENSE)로 공개합니다. 라이선스 조건에 따라 자유롭게 사용하고 수정하며 배포할 수 있습니다.
