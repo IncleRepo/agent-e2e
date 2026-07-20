@@ -4,6 +4,7 @@
   "private": true,
   "description": "AI-agent operated Playwright E2E framework",
   "scripts": {
+    "browser:install": "playwright install chromium",
     "project:init": "node scripts/init-project.mjs",
     "validate": "node scripts/validate-project.mjs",
     "audit": "node scripts/run-project.mjs",
