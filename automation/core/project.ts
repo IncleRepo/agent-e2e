@@ -47,7 +47,7 @@ export type ProjectConfig = {
   };
 };
 
-export const automationRoot = path.resolve(process.cwd());
+export const automationRoot = path.resolve(__dirname, '..');
 export const workspaceRoot = path.resolve(automationRoot, '..');
 
 dotenv.config({ path: path.join(automationRoot, '.env.e2e.local'), override: false, quiet: true });

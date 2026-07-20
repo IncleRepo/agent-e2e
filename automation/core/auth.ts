@@ -21,9 +21,13 @@ export function requireCredentials(): void {
   if (missing.length > 0) throw new Error(`Missing authentication environment variables: ${missing.join(', ')}`);
 }
 
-export async function authenticate(page: Page): Promise<void> {
+export async function authenticate(
+  page: Page,
+  options: { afterNavigation?: () => Promise<void> } = {},
+): Promise<void> {
   requireCredentials();
   await page.goto(project.auth.loginPath);
+  await options.afterNavigation?.();
   await locate(page, project.auth.username).fill(runtime.loginId);
   await locate(page, project.auth.password).fill(runtime.loginPassword);
   await locate(page, project.auth.submit).click();

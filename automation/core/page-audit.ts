@@ -56,14 +56,15 @@ export async function runPageAudit(
       else audit.unknownOverlays.push(overlay);
     }
 
-    await page.waitForTimeout(1_000);
     audit.finalPath = new URL(page.url()).pathname;
-    audit.mainVisible = await page.locator('#main-content').isVisible();
+    const mainContent = page.locator('#main-content');
+    await mainContent.waitFor({ state: 'visible', timeout: 3_000 }).catch(() => undefined);
+    audit.mainVisible = await mainContent.isVisible();
 
     if (options.action) {
       try {
         await options.action(page);
-        await page.waitForTimeout(750);
+        await page.waitForTimeout(100);
       } catch (error) {
         audit.workflowError = error instanceof Error ? error.message : String(error);
       }
@@ -90,7 +91,7 @@ export async function runPageAudit(
       );
     }
 
-    const bodyText = await page.locator('#main-content').innerText().catch(() => '');
+    const bodyText = await mainContent.innerText().catch(() => '');
     audit.invalidTexts = [...new Set(bodyText.match(INVALID_TEXT_PATTERN) ?? [])];
   } catch (error) {
     audit.navigationError = error instanceof Error ? error.message : String(error);
