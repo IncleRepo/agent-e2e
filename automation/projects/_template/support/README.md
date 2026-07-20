@@ -1,5 +1,5 @@
-# Project Support Code
+# 프로젝트 보조 코드
 
-Place project-specific page objects, data readers, and reusable workflow helpers here.
+한 프로젝트에서만 쓰는 페이지 객체, API 데이터 조회, 반복 워크플로를 이 폴더에 둔다.
 
-Keep shared execution, safety, diagnostics, and reporting behavior in `automation/core/`.
+실행, 안전장치, 브라우저 진단, 보고서처럼 모든 프로젝트에서 같은 기능은 `automation/core/`에서 관리한다.

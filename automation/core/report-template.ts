@@ -135,10 +135,10 @@ function renderScenario(scenario: ReportScenario, index: number): string {
   const audit = scenario.audit;
   const checkDescription = audit?.workflow
     ?? (scenario.project === 'preflight'
-      ? 'FE와 BE 서버가 테스트 가능한 상태인지 확인'
+      ? 'FE와 API 서버에 연결할 수 있는지 확인'
       : scenario.project === 'auth-setup'
-        ? '실제 로그인 화면으로 인증 상태 생성'
-        : '화면 진입, 로딩, 오류 경계, 비정상 문자열, 콘솔·API 오류 확인');
+        ? '로그인 화면에서 테스트 계정의 인증 상태 준비'
+        : '화면 표시, 로딩 상태, 비정상 문자열, 콘솔과 API 오류 확인');
   const evidence = [
     ...scenario.images.map((item) => `
       <figure class="evidence-item">
@@ -160,7 +160,7 @@ function renderScenario(scenario: ReportScenario, index: number): string {
             ${audit?.route.path ? `<code>${escapeHtml(audit.route.path)}</code>` : ''}
             <span>${formatDuration(scenario.duration)}</span>
             ${audit ? `<span>진단 ${audit.diagnostics.length}건</span>` : ''}
-            ${findingCount(audit) > 0 ? `<span class="related-finding">관련 이슈 ${findingCount(audit)}건</span>` : ''}
+            ${findingCount(audit) > 0 ? `<span class="related-finding">확인 항목 ${findingCount(audit)}건</span>` : ''}
           </div>
         </div>
         <button class="scenario-toggle" type="button" aria-expanded="false" aria-label="상세 정보 펼치기">
@@ -175,7 +175,7 @@ function renderScenario(scenario: ReportScenario, index: number): string {
           ${audit ? `<div><dt>브라우저 진단</dt><dd>${audit.diagnostics.length}건</dd></div>` : ''}
         </dl>
         ${scenario.error ? `<pre class="error-text">${escapeHtml(scenario.error)}</pre>` : ''}
-        ${evidence ? `<div class="evidence-grid">${evidence}</div>` : '<p class="detail-empty">추가 증거 없이 정상 완료됐습니다.</p>'}
+        ${evidence ? `<div class="evidence-grid">${evidence}</div>` : '<p class="detail-empty">별도로 첨부된 자료는 없습니다.</p>'}
       </div>
     </article>`;
 }
@@ -199,12 +199,12 @@ function renderIssue(issue: ReportIssue, kind: 'issue' | 'review', index: number
       <h3>${escapeHtml(issue.change)}</h3>
       <p class="finding-location">${escapeHtml(issue.majorMenu)} · ${escapeHtml(issue.menu)}</p>
       <div class="finding-summary">
-        <span>${kind === 'issue' ? '발견 상태' : '검토 상태'}</span>
+        <span>처리 상태</span>
         <strong>${escapeHtml(issue.fixed === 'O' ? '조치 완료' : kind === 'issue' ? '미조치' : '확인 전')}</strong>
         ${observed > 0 ? `<span>${observed}개 화면에서 관찰</span>` : ''}
       </div>
       <details>
-        <summary>재현 정보와 근거 보기</summary>
+        <summary>재현 경로와 판단 근거</summary>
         <div class="finding-detail">
           ${urls.length > 0 ? `<div><h4>재현 경로</h4><ul>${urls.map((note) => `<li><code>${escapeHtml(note.replace('재현 URL:', '').trim())}</code></li>`).join('')}</ul></div>` : ''}
           ${screens.length > 0 ? `<div><h4>관찰 화면</h4><ul>${screens.map((note) => `<li>${escapeHtml(note.replace('관찰 화면:', '').trim())}</li>`).join('')}</ul></div>` : ''}
@@ -217,17 +217,17 @@ function renderIssue(issue: ReportIssue, kind: 'issue' | 'review', index: number
 export function renderUnifiedReport(data: UnifiedReportData): string {
   const activeScenarios = data.scenarios.filter((scenario) => !['preflight', 'auth-setup'].includes(scenario.project));
   const preparation = data.scenarios.filter((scenario) => ['preflight', 'auth-setup'].includes(scenario.project));
-  const passed = activeScenarios.filter((scenario) => scenario.status === 'passed').length;
-  const failed = activeScenarios.length - passed;
+  const passed = activeScenarios.filter((scenario) => scenarioState(scenario) === 'passed').length;
+  const failed = activeScenarios.filter((scenario) => scenarioState(scenario) === 'failed').length;
   const duration = data.endedAt.getTime() - data.startedAt.getTime();
   const reportTone = failed > 0 ? 'failed' : data.issues.length > 0 ? 'finding' : data.reviews.length > 0 ? 'review' : 'passed';
   const reportTitle = failed > 0
-    ? `${failed}개 시나리오가 실패했습니다`
+    ? `${failed}개 시나리오를 완료하지 못했습니다`
     : data.issues.length > 0
-      ? `검사는 완료됐고, 확인할 이슈 ${data.issues.length}건이 있습니다`
+      ? `테스트를 마쳤습니다. 확인할 이슈는 ${data.issues.length}건입니다`
       : data.reviews.length > 0
-        ? `검사는 완료됐고, 검토할 항목 ${data.reviews.length}건이 있습니다`
-        : '모든 E2E 시나리오가 정상입니다';
+        ? `테스트를 마쳤습니다. 검토할 항목은 ${data.reviews.length}건입니다`
+        : '모든 E2E 시나리오를 통과했습니다';
 
   const grouped = new Map<string, ReportScenario[]>();
   for (const scenario of activeScenarios) {
@@ -236,7 +236,7 @@ export function renderUnifiedReport(data: UnifiedReportData): string {
   }
 
   const scenarioSections = [...grouped.entries()].map(([group, scenarios]) => {
-    const groupPassed = scenarios.filter((scenario) => scenario.status === 'passed').length;
+    const groupPassed = scenarios.filter((scenario) => scenarioState(scenario) === 'passed').length;
     return `
       <section class="scenario-group" data-group="${escapeHtml(group)}">
         <header class="group-head">
@@ -245,20 +245,26 @@ export function renderUnifiedReport(data: UnifiedReportData): string {
         </header>
         <div class="scenario-list">${scenarios.map(renderScenario).join('')}</div>
       </section>`;
-  }).join('');
+  }).join('') || '<div class="empty-state"><strong>실행된 시나리오가 없습니다</strong><p>프로젝트 라우트와 테스트 구성을 확인해 주세요.</p></div>';
 
   const preparationHtml = preparation.map(renderScenario).join('');
   const issueHtml = data.issues.length > 0
     ? data.issues.map((issue, index) => renderIssue(issue, 'issue', index)).join('')
-    : '<div class="empty-state"><strong>발견된 이슈가 없습니다</strong><p>이번 실행에서 화면, API, 콘솔 오류가 관찰되지 않았습니다.</p></div>';
+    : '<div class="empty-state"><strong>새로 발견한 이슈가 없습니다</strong><p>이번 실행에서는 화면, API, 콘솔, 데이터 표출 문제를 찾지 못했습니다.</p></div>';
   const reviewHtml = data.reviews.length > 0
     ? data.reviews.map((issue, index) => renderIssue(issue, 'review', index)).join('')
-    : '<div class="empty-state"><strong>추가 검토가 필요한 항목이 없습니다</strong><p>장시간 로딩이나 판정 보류 항목이 발견되지 않았습니다.</p></div>';
+    : '<div class="empty-state"><strong>검토를 보류한 항목이 없습니다</strong><p>환경이나 업무 기준을 더 확인해야 할 항목은 없었습니다.</p></div>';
   const issueTsv = makeTsv(data.issues);
   const reviewTsv = makeTsv(data.reviews);
   const feUrl = escapeHtml(data.metadata.feUrl ?? '-');
   const apiUrl = escapeHtml(data.metadata.apiUrl ?? '-');
   const projectName = escapeHtml(data.metadata.projectName ?? data.metadata.projectId ?? 'Web Project');
+  const overallStatus = escapeHtml({
+    passed: '완료',
+    failed: '실패',
+    timedout: '시간 초과',
+    interrupted: '중단',
+  }[data.overallStatus] ?? data.overallStatus);
 
   return `<!doctype html>
 <html lang="ko">
@@ -285,6 +291,8 @@ export function renderUnifiedReport(data: UnifiedReportData): string {
       --amber-soft: #fff3da;
       --blue: #2864a5;
       --blue-soft: #eaf2fb;
+      --accent: var(--teal);
+      --hero-accent: #72d8c8;
       --shadow: 0 10px 30px rgba(20, 42, 49, .07);
       font-family: Pretendard, "Noto Sans KR", "Segoe UI", sans-serif;
       letter-spacing: 0;
@@ -292,19 +300,21 @@ export function renderUnifiedReport(data: UnifiedReportData): string {
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body { margin: 0; background: var(--bg); color: var(--text); }
+    body[data-report-tone="failed"] { --accent: var(--red); --hero-accent: #ff9ea4; }
+    body[data-report-tone="finding"], body[data-report-tone="review"] { --accent: var(--amber); --hero-accent: #f4c878; }
     button, input { font: inherit; letter-spacing: 0; }
     button { cursor: pointer; }
     a { color: inherit; }
     code { font-family: "Cascadia Code", Consolas, monospace; font-size: .86em; overflow-wrap: anywhere; }
     .shell { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
-    .hero { background: var(--dark); color: #fff; border-bottom: 5px solid var(--teal); }
+    .hero { background: var(--dark); color: #fff; border-bottom: 5px solid var(--accent); }
     .hero-inner { padding: 48px 0 42px; }
     .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 44px; }
-    .brand-mark { display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid rgba(255,255,255,.28); border-radius: 6px; font-weight: 800; color: #72d8c8; }
+    .brand-mark { display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid rgba(255,255,255,.28); border-radius: 6px; font-weight: 800; color: var(--hero-accent); }
     .brand-copy strong { display: block; font-size: 15px; }
     .brand-copy span { display: block; margin-top: 2px; color: #a9bbc1; font-size: 12px; }
     .hero-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(280px, .7fr); gap: 48px; align-items: end; }
-    .eyebrow { margin: 0 0 12px; color: #72d8c8; font-size: 13px; font-weight: 700; }
+    .eyebrow { margin: 0 0 12px; color: var(--hero-accent); font-size: 13px; font-weight: 700; }
     h1 { max-width: 760px; margin: 0; font-size: 38px; line-height: 1.25; letter-spacing: 0; }
     .hero-desc { max-width: 700px; margin: 18px 0 0; color: #c5d0d3; line-height: 1.7; }
     .run-meta { border-left: 1px solid rgba(255,255,255,.2); padding-left: 28px; }
@@ -322,6 +332,7 @@ export function renderUnifiedReport(data: UnifiedReportData): string {
     .metric-success strong { color: var(--green); }
     .metric-fail strong { color: var(--red); }
     .metric-finding strong { color: var(--amber); }
+    .metric-review strong { color: var(--blue); }
     .report-nav { position: sticky; top: 0; z-index: 20; background: rgba(244,246,247,.96); border-bottom: 1px solid var(--line); backdrop-filter: blur(12px); }
     .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 58px; }
     .nav-links { display: flex; align-items: center; gap: 22px; overflow-x: auto; }
@@ -333,7 +344,7 @@ export function renderUnifiedReport(data: UnifiedReportData): string {
     main { padding-bottom: 80px; }
     .section { padding-top: 70px; scroll-margin-top: 60px; }
     .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; padding-bottom: 18px; border-bottom: 2px solid var(--text); }
-    .section-kicker, .group-kicker { display: block; color: var(--teal); font-size: 11px; font-weight: 800; text-transform: uppercase; }
+    .section-kicker, .group-kicker { display: block; color: var(--teal); font-size: 11px; font-weight: 800; }
     .section-heading h2 { margin: 5px 0 0; font-size: 25px; }
     .section-heading p { max-width: 520px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; text-align: right; }
     .filter-bar { display: flex; gap: 6px; margin: 20px 0 30px; }
@@ -453,19 +464,19 @@ export function renderUnifiedReport(data: UnifiedReportData): string {
     <div class="shell hero-inner">
       <div class="brand">
         <span class="brand-mark">E2E</span>
-        <span class="brand-copy"><strong>${projectName}</strong><span>End-to-End Quality Report</span></span>
+        <span class="brand-copy"><strong>${projectName}</strong><span>E2E 품질 보고서</span></span>
       </div>
       <div class="hero-grid">
         <div>
-          <p class="eyebrow">${reportTone === 'passed' ? 'ALL SYSTEMS PASSED' : reportTone === 'failed' ? 'ACTION REQUIRED' : 'REVIEW FINDINGS'}</p>
+          <p class="eyebrow">${reportTone === 'passed' ? '테스트 완료' : reportTone === 'failed' ? '조치가 필요합니다' : '확인할 항목이 있습니다'}</p>
           <h1>${escapeHtml(reportTitle)}</h1>
-          <p class="hero-desc">실제 사용자 흐름으로 화면과 API를 점검한 결과입니다. 아래에서 시나리오 현황, 발견 이슈, 추가 검토 항목을 순서대로 확인할 수 있습니다.</p>
+          <p class="hero-desc">실제 사용자 흐름을 따라 화면, API, 콘솔, 데이터 표출을 점검했습니다. 시나리오 결과부터 발견 이슈와 검토 항목까지 순서대로 정리했습니다.</p>
         </div>
         <aside class="run-meta" aria-label="실행 정보">
           <dl>
             <div><dt>실행 시각</dt><dd>${formatDate(data.startedAt)}</dd></div>
             <div><dt>소요 시간</dt><dd>${formatDuration(duration)}</dd></div>
-            <div><dt>실행 상태</dt><dd>${escapeHtml(data.overallStatus)}</dd></div>
+            <div><dt>실행 상태</dt><dd>${overallStatus}</dd></div>
             <div><dt>검사 방식</dt><dd>읽기 전용 · Desktop Chrome</dd></div>
           </dl>
         </aside>
@@ -475,11 +486,11 @@ export function renderUnifiedReport(data: UnifiedReportData): string {
 
   <section class="summary-band" aria-label="결과 요약">
     <div class="shell metrics">
-      <div class="metric"><span>전체 시나리오</span><strong>${activeScenarios.length}</strong><small>준비 검사 ${preparation.length}개 별도</small></div>
-      <div class="metric metric-success"><span>통과</span><strong>${passed}</strong><small>정상 완료</small></div>
-      <div class="metric metric-fail"><span>실패</span><strong>${failed}</strong><small>실행 실패</small></div>
-      <div class="metric metric-finding"><span>발견 이슈</span><strong>${data.issues.length}</strong><small>중복 제거</small></div>
-      <div class="metric"><span>검토 필요</span><strong>${data.reviews.length}</strong><small>추가 판단 대상</small></div>
+      <div class="metric"><span>전체 시나리오</span><strong>${activeScenarios.length}</strong><small>준비 검사 ${preparation.length}개 제외</small></div>
+      <div class="metric metric-success"><span>통과</span><strong>${passed}</strong><small>기대 결과 확인</small></div>
+      <div class="metric metric-fail"><span>실패</span><strong>${failed}</strong><small>완료하지 못한 시나리오</small></div>
+      <div class="metric metric-finding"><span>발견 이슈</span><strong>${data.issues.length}</strong><small>같은 원인은 한 건으로 집계</small></div>
+      <div class="metric metric-review"><span>검토 필요</span><strong>${data.reviews.length}</strong><small>사람의 판단이 필요한 항목</small></div>
     </div>
   </section>
 
@@ -501,38 +512,38 @@ export function renderUnifiedReport(data: UnifiedReportData): string {
   <main class="shell">
     <section id="scenarios" class="section">
       <header class="section-heading">
-        <div><span class="section-kicker">Scenario status</span><h2>E2E 시나리오 현황</h2></div>
-        <p>메뉴별로 실행 결과를 정리했습니다. 각 행을 펼치면 검사 내용과 증거를 볼 수 있습니다.</p>
+        <div><span class="section-kicker">실행 결과</span><h2>E2E 시나리오</h2></div>
+        <p>메뉴별 결과입니다. 각 항목을 열면 검사 내용과 첨부 자료를 확인할 수 있습니다.</p>
       </header>
       <div class="filter-bar" role="group" aria-label="시나리오 상태 필터">
         <button class="filter-btn" type="button" data-filter="all" aria-pressed="true">전체 ${activeScenarios.length}</button>
         <button class="filter-btn" type="button" data-filter="passed" aria-pressed="false">통과 ${passed}</button>
         <button class="filter-btn" type="button" data-filter="failed" aria-pressed="false">실패 ${failed}</button>
-        <button class="filter-btn" type="button" data-filter="finding" aria-pressed="false">이슈 연관 ${activeScenarios.filter((scenario) => findingCount(scenario.audit) > 0).length}</button>
+        <button class="filter-btn" type="button" data-filter="finding" aria-pressed="false">확인 항목 있음 ${activeScenarios.filter((scenario) => findingCount(scenario.audit) > 0).length}</button>
       </div>
       ${scenarioSections}
     </section>
 
     <section id="issues" class="section">
       <header class="section-heading">
-        <div><span class="section-kicker">Findings</span><h2>발견된 이슈</h2></div>
-        <p>동일한 원인은 하나로 합치고, 관찰된 화면과 재현 경로를 연결했습니다.</p>
+        <div><span class="section-kicker">자동 추출</span><h2>발견된 이슈</h2></div>
+        <p>같은 원인은 한 건으로 묶고, 문제가 보인 화면과 재현 경로를 함께 적었습니다.</p>
       </header>
       <div class="finding-list">${issueHtml}</div>
     </section>
 
     <section id="reviews" class="section">
       <header class="section-heading">
-        <div><span class="section-kicker">Needs review</span><h2>추가 검토 필요</h2></div>
-        <p>환경 속도나 업무 기준이 필요해 자동으로 결함을 확정하지 않은 항목입니다.</p>
+        <div><span class="section-kicker">판정 보류</span><h2>추가 검토 필요</h2></div>
+        <p>환경 차이나 업무 기준 때문에 자동으로 결함을 확정하지 않은 항목입니다.</p>
       </header>
       <div class="finding-list">${reviewHtml}</div>
     </section>
 
     <section id="environment" class="section">
       <header class="section-heading">
-        <div><span class="section-kicker">Run details</span><h2>실행 준비와 환경</h2></div>
-        <p>서비스 연결과 로그인 검사를 실제 시나리오 실행 전에 확인했습니다.</p>
+        <div><span class="section-kicker">실행 정보</span><h2>준비 상태와 환경</h2></div>
+        <p>본 시나리오를 시작하기 전에 서버 연결과 로그인을 확인한 결과입니다.</p>
       </header>
       <div class="scenario-list prep-list">${preparationHtml}</div>
       <div class="environment">
@@ -543,7 +554,7 @@ export function renderUnifiedReport(data: UnifiedReportData): string {
   </main>
 
   <footer>
-    <div class="shell">${projectName} E2E 자동화 · ${formatDate(data.endedAt)} 생성</div>
+    <div class="shell">${projectName} · ${formatDate(data.endedAt)}에 Agent E2E가 생성한 보고서</div>
   </footer>
 
   <script>

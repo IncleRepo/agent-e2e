@@ -1,33 +1,36 @@
-# Agent E2E 작업 규칙
+# Agent E2E 작업 기준
 
-이 저장소는 여러 웹 프로젝트에 재사용하는 Playwright E2E 프레임워크다. AI 에이전트는 공통 엔진을 임의로 제품에 종속시키지 않고, 프로젝트별 차이는 `automation/projects/<project-id>/`에만 추가한다.
+이 저장소는 여러 웹 프로젝트에서 함께 쓰는 Playwright E2E 도구다. 프로젝트별 차이는 `automation/projects/<project-id>/`에 두고, 공통 엔진에는 특정 서비스의 이름이나 경로를 넣지 않는다.
 
-## 작업 시작 순서
+## 작업을 시작할 때
 
-1. 이 파일과 `README.md`를 읽는다.
-2. `automation/docs/AGENT_WORKFLOW.md`와 `automation/docs/SAFETY_RULES.md`를 읽는다.
-3. 신규 프로젝트라면 `automation/docs/PROJECT_ONBOARDING.md`를 따른다.
-4. 기존 프로젝트라면 해당 `project.json`, `routes.json`, `known-issues.json`, `tests/`를 먼저 읽는다.
-5. 변경 전 `npm --prefix automation run validate -- --project <id>`를 실행한다.
+1. `README.md`와 이 파일을 읽는다.
+2. `automation/docs/AGENT_WORKFLOW.md`, `automation/docs/SAFETY_RULES.md`를 확인한다.
+3. 새 프로젝트는 `automation/docs/PROJECT_ONBOARDING.md` 순서로 연결한다.
+4. 기존 프로젝트는 해당 폴더의 `project.json`, `routes.json`, `known-issues.json`, `tests/`부터 살핀다.
+5. 손대기 전에 `npm --prefix automation run validate -- --project <id>`로 현재 상태를 확인한다.
 
-## 경계
+## 파일을 나누는 기준
 
-- `automation/core/`: 프로젝트 독립적인 실행, 진단, 안전, 보고서 기능만 둔다.
-- `automation/projects/<id>/`: URL, 인증 규칙, 화면 경로, 알려진 이슈, 고유 시나리오를 둔다.
-- `reports/report.html`: 사용자가 보는 최신 결과물이다.
-- FE/BE 소스는 기본적으로 읽기와 원인 조사만 허용한다.
+- `automation/core/`: 어느 프로젝트에서나 같은 실행, 진단, 안전장치, 보고서 기능
+- `automation/projects/<id>/`: URL, 로그인 방식, 화면 경로, 알려진 이슈, 프로젝트 고유 시나리오
+- `reports/report.html`: 사람이 확인하는 가장 최근 결과
+- FE/BE 저장소: 원인 파악을 위한 읽기만 허용하며, 요청받지 않은 수정은 하지 않음
 
-## 필수 원칙
+두 프로젝트 이상에서 같은 코드가 반복될 때만 `core`로 옮긴다. 그전에는 프로젝트 폴더 안에 둔다.
 
-- 프로젝트명, 메뉴명, API 경로 같은 종속 요소를 `core`에 하드코딩하지 않는다.
-- 프로젝트 시나리오는 `automation/core/test`에서 `test`를 가져와 읽기 전용 요청 차단을 적용한다.
-- 로그인 외 쓰기 요청이 필요하면 사용자 확인 후 `project.json`의 `safety.allowedWrites`에 정확한 메서드와 경로만 추가한다.
-- 등록, 수정, 삭제, 권한 변경, 결제, 메시지 전송은 명시적 승인 없이 자동화하지 않는다.
-- 실패를 통과시키기 위해 검증을 삭제하거나 기대값을 현재 오류에 맞춰 변경하지 않는다.
-- 모든 이슈는 재현 경로와 화면/API/콘솔 증거를 가져야 한다.
-- 비밀번호, 토큰, 쿠키, 개인정보는 코드, 로그, 보고서에 기록하지 않는다.
+## 반드시 지킬 것
 
-## 기본 명령
+- 프로젝트명, 메뉴명, API 경로를 `core`에 하드코딩하지 않는다.
+- 프로젝트 테스트는 `automation/core/test`에서 `test`를 가져온다. 그래야 읽기 전용 요청 차단이 적용된다.
+- 로그인 과정에서 POST 요청 등이 꼭 필요하면 먼저 사용자에게 알리고, `safety.allowedWrites`에 메서드와 경로를 정확히 적는다.
+- 등록, 수정, 삭제, 권한 변경, 결제, 주문, 메시지 전송은 명시적인 승인 없이 실행하지 않는다.
+- 실패를 숨기려고 검증을 지우거나 기대값을 현재 오류에 맞추지 않는다.
+- 이슈에는 재현 경로와 화면, API, 콘솔 중 하나 이상의 근거를 남긴다.
+- 비밀번호, 토큰, 쿠키, 개인정보를 코드·로그·보고서에 기록하지 않는다.
+- 제품 문제인지 확실하지 않으면 `검토 필요`로 남기고 판단 근거를 적는다.
+
+## 자주 쓰는 명령
 
 ```powershell
 npm --prefix automation install
@@ -37,11 +40,10 @@ npm --prefix automation run audit -- --project my-project
 npm --prefix automation run report:open
 ```
 
-## 완료 조건
+## 작업을 마치기 전에
 
-- 프로젝트 프로필 검증 통과
-- TypeScript 검사 통과
-- 대상 E2E 실행 완료
-- `reports/report.html` 생성 확인
-- 보고서 민감정보 미포함 확인
-- 사용자에게 시나리오 성공/실패, 발견 이슈, 검토 필요 항목을 요약
+1. 프로젝트 프로필 검증과 TypeScript 검사를 통과시킨다.
+2. 대상 E2E를 끝까지 실행한다.
+3. `reports/report.html`이 생성됐는지 확인한다.
+4. 보고서와 증거 파일에 민감정보가 없는지 살핀다.
+5. 실행한 시나리오, 실패, 발견 이슈, 검토 항목, 실행하지 못한 범위를 짧게 정리한다.

@@ -88,8 +88,8 @@ function buildAuditRows(audits: RouteAudit[]): {
         `navigation:${audit.route.path}:${audit.navigationError}`,
         createIssue(
           audit,
-          { development: 'FE, BE', change: `화면 진입 실패: ${audit.navigationError}`, type: '화면' },
-          '화면 이동 중 예외가 발생함',
+          { development: 'FE, BE', change: `화면에 진입하지 못함: ${audit.navigationError}`, type: '화면' },
+          '화면을 여는 도중 예외가 발생했습니다.',
         ),
       );
     }
@@ -102,10 +102,10 @@ function buildAuditRows(audits: RouteAudit[]): {
           audit,
           {
             development: 'FE, BE',
-            change: `${audit.workflow ?? '조회 동작'} 검증 실패: ${audit.workflowError}`,
+            change: `${audit.workflow ?? '조회 동작'}을 완료하지 못함: ${audit.workflowError}`,
             type: '기능',
           },
-          `조회 전용 E2E 동작: ${audit.workflow ?? '이름 없음'}`,
+          `점검한 사용자 흐름: ${audit.workflow ?? '기록 없음'}`,
         ),
       );
     }
@@ -118,7 +118,7 @@ function buildAuditRows(audits: RouteAudit[]): {
           audit,
           {
             development: 'FE',
-            change: `요청 경로에서 예상하지 않은 경로로 이동됨 (${audit.finalPath})`,
+            change: `예상하지 않은 경로로 이동함 (${audit.finalPath})`,
             type: '화면',
           },
           `기대 경로: ${audit.route.path}, 실제 경로: ${audit.finalPath}`,
@@ -132,8 +132,8 @@ function buildAuditRows(audits: RouteAudit[]): {
         `main:${audit.route.path}`,
         createIssue(
           audit,
-          { development: 'FE', change: '본문 영역이 표시되지 않음', type: '화면' },
-          '#main-content 비표시',
+          { development: 'FE', change: '화면의 본문 영역이 표시되지 않음', type: '화면' },
+          '`#main-content` 요소를 찾았지만 화면에 표시되지 않았습니다.',
         ),
       );
     }
@@ -144,8 +144,8 @@ function buildAuditRows(audits: RouteAudit[]): {
         `boundary:${audit.route.path}`,
         createIssue(
           audit,
-          { development: 'FE, BE', change: '화면에 오류 경계 안내가 표시됨', type: '화면' },
-          '"잠시 후 다시 시도해주세요" 문구 노출',
+          { development: 'FE, BE', change: '오류 안내 화면이 표시됨', type: '화면' },
+          '프로젝트에서 오류 화면으로 지정한 문구가 표시됐습니다.',
         ),
       );
     }
@@ -156,7 +156,7 @@ function buildAuditRows(audits: RouteAudit[]): {
         `invalid-text:${audit.route.path}:${invalidText}`,
         createIssue(
           audit,
-          { development: 'FE', change: `화면에 비정상 값 ${invalidText}가 표시됨`, type: '데이터 표출' },
+          { development: 'FE', change: `화면에 비정상 값 '${invalidText}'가 표시됨`, type: '데이터 표출' },
           `관찰 문자열: ${invalidText}`,
         ),
       );
@@ -168,8 +168,8 @@ function buildAuditRows(audits: RouteAudit[]): {
         `overlay:${overlay}`,
         createIssue(
           audit,
-          { development: 'FE', change: `개발 오류 오버레이가 노출됨: ${overlay}`, type: '오류' },
-          '알려진 이슈와 일치하지 않는 오버레이',
+          { development: 'FE', change: `개발 오류 오버레이가 표시됨: ${overlay}`, type: '오류' },
+          '알려진 이슈로 등록되지 않은 오류 오버레이입니다.',
         ),
       );
     }
@@ -202,7 +202,7 @@ function buildAuditRows(audits: RouteAudit[]): {
             change: `${entry.message}${location}`,
             type: issueType,
           },
-          `브라우저 진단 종류: ${entry.kind}`,
+          `브라우저에서 수집한 진단 종류: ${entry.kind}`,
         ),
       );
     }
@@ -215,10 +215,10 @@ function buildAuditRows(audits: RouteAudit[]): {
           audit,
           {
             development: 'FE, BE',
-            change: '초기 진입 후 8초가 지나도 로딩 상태가 유지됨',
+            change: '화면 진입 후 8초가 지나도 로딩이 끝나지 않음',
             type: '성능/로딩',
           },
-          `환경 속도 또는 API 응답 시간을 추가 확인해야 함. 남은 로딩 요소: ${audit.loadingIndicators.join(', ') || '이름 없음'}`,
+          `환경 속도와 API 응답 시간을 함께 확인해야 합니다. 남아 있는 로딩 요소: ${audit.loadingIndicators.join(', ') || '기록 없음'}`,
         ),
       );
     }
