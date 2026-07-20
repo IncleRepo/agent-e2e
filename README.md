@@ -55,11 +55,11 @@ reports/report.html에서 결과를 확인함
 ### 1. 저장소 받기
 
 ```powershell
-git clone <repository-url> agent-e2e
+git clone https://github.com/IncleRepo/agent-e2e.git
 cd agent-e2e
 ```
 
-`<repository-url>`에는 GitHub 저장소의 `Code` 버튼에서 복사한 주소를 넣습니다. 이미 폴더를 받았다면 이 단계는 건너뜁니다.
+이미 폴더를 받았다면 이 단계는 건너뜁니다.
 
 ### 2. 실행 도구 설치하기
 
