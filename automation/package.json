@@ -22,7 +22,7 @@
     "check": "npm run validate -- --project _template && npm run typecheck && playwright test --list --reporter=line"
   },
   "devDependencies": {
-    "@playwright/test": "1.61.1",
+    "@playwright/test": "1.63.0",
     "@types/node": "24.12.2",
     "dotenv": "17.4.2",
     "typescript": "7.0.2"
